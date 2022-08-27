@@ -14,7 +14,7 @@ module.exports = {
     archiveRetentionTime: 15,
     accountRetentionTime: 365,
     maxUploadSize: 8 * 1024 * 1024,
-    filePath: '/home/pacs/{{pac}}/users/{{users}}/data/file/',
+    filePath: '/home/pacs/{{pac}}/users/{{user}}/data/file/',
     archivePath: '/home/pacs/{{pac}}/users/{{user}}/data/archive/',
     pinPath: '/home/pacs/{{pac}}/users/{{user}}/data/pins',
     taskPath: '/home/pacs/{{pac}}/users/{{user}}/data/tasks',

@@ -8,7 +8,7 @@ cryptpad:
       user: cryptpad
       password: testpassw0rd_changeme
 
-      cryptpadport: 32003
+      cryptpad_port: 32003
 
       # see https://github.com/xwiki-labs/cryptpad/tags
       cryptpad_version: "5.0.0"

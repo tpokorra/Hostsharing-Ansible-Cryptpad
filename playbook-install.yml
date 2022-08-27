@@ -85,7 +85,7 @@
   - name: upload configuration file
     become: yes
     become_user: "{{pac}}-{{user}}"
-    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/cryptpad/config.js" src="templates/config.js"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/cryptpad/config/config.js" src="templates/config.js"
 
   #################################
   ## install data directory
@@ -151,22 +151,22 @@
   - name: upload domain htaccess file
     become: yes
     become_user: "{{pac}}-{{user}}"
-    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/.htaccess" src="templates/domain_htaccess"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/.htaccess" src="templates/domain_htaccess"
 
   - name: upload htdocs-ssl htaccess file
     become: yes
     become_user: "{{pac}}-{{user}}"
-    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/htdocs-ssl/.htaccess" src="templates/htaccess"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/.htaccess" src="templates/htaccess"
 
   - name: upload http api htaccess file
     become: yes
     become_user: "{{pac}}-{{user}}"
-    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/subs/api/.htaccess" src="templates/http_api_htaccess"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/subs/api/.htaccess" src="templates/http_api_htaccess"
 
   - name: upload https api htaccess file
     become: yes
     become_user: "{{pac}}-{{user}}"
-    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/subs-ssl/api/.htaccess" src="templates/https_api_htaccess"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/subs-ssl/api/.htaccess" src="templates/https_api_htaccess"
 
   - name: create symbolic link for data blob on ssd
     become: yes
@@ -175,7 +175,7 @@
       src: "/home/pacs/{{pac}}/users/{{user}}/data/blob"
       dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/blob"
       state: link
-      when: not hdd_storage.stat.exists
+    when: not hdd_storage.stat.exists
 
   - name: create symbolic link for data block on ssd
     become: yes
@@ -184,7 +184,7 @@
       src: "/home/pacs/{{pac}}/users/{{user}}/data/block"
       dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/block"
       state: link
-      when: not hdd_storage.stat.exists
+    when: not hdd_storage.stat.exists
 
   - name: create symbolic link for data blob on hdd
     become: yes
@@ -193,7 +193,7 @@
       src: "/home/storage/{{pac}}/users/{{user}}/data/blob"
       dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/blob"
       state: link
-      when: hdd_storage.stat.exists
+    when: hdd_storage.stat.exists
 
   - name: create symbolic link for data block on hdd
     become: yes
@@ -202,7 +202,7 @@
       src: "/home/storage/{{pac}}/users/{{user}}/data/block"
       dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/block"
       state: link
-      when: hdd_storage.stat.exists
+    when: hdd_storage.stat.exists
 
   ####################################
   ## install cron jobs
