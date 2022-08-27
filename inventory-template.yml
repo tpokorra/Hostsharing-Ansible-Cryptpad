@@ -8,6 +8,9 @@ cryptpad:
       user: {{username}}
       password: {{password}}
 
+      # copy this from the settings of the first user, and rerun the script
+      AdminKey: "[admin@cryptpad.example.org/randomcharacters]"
+
       cryptpad_port: {{port1}}
       random_minute: {{RandomMinute}}
 
