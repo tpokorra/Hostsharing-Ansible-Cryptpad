@@ -1,0 +1,12 @@
+---
+#################################
+## setup the user, and the domain
+#################################
+- name: ensure user exists
+  hsuser.js: name="{{pac}}-{{user}}" password="{{password}}" exists="true"
+- name: setup domain
+  hsdomain.js: name="{{domain}}" owner="{{pac}}-{{user}}" exists="true"
+
+- name: Sleep to avoid issue invalid user for temporary files
+  pause:
+    seconds: 10

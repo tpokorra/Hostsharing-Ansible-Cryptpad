@@ -1,0 +1,230 @@
+---
+- hosts: cryptpad
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    # see https://docs.ansible.com/ansible/latest/user_guide/become.html#risks-of-becoming-an-unprivileged-user
+    ansible_common_remote_group: "{{pac}}"
+    ansible_remote_tmp: ~/.ansible/tmp
+
+  tasks:
+  - name: Create user and domain
+    import_tasks: tasks/hs_basis.yml
+
+  #################################
+  ## create directories
+  #################################
+  - name: create directory etc
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "/home/pacs/{{pac}}/users/{{user}}/etc"
+      state: directory
+  - name: create directory var/tmp
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "/home/pacs/{{pac}}/users/{{user}}/var/tmp"
+      state: directory
+  - name: create directory var/log
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "/home/pacs/{{pac}}/users/{{user}}/var/log"
+      state: directory
+  - name: create directory var/run
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "/home/pacs/{{pac}}/users/{{user}}/var/run"
+      state: directory
+
+  #################################
+  ## install requirements
+  #################################
+  - name: Install node.js
+    import_tasks: tasks/hs_nodejs.yml
+
+  ##################################
+  ## install cryptpad
+  ##################################
+
+  - name: Check for git working tree
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    stat:
+      path: /home/pacs/{{pac}}/users/{{user}}/cryptpad
+    register: workingtree
+  - name: get repo
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    git:
+      repo: https://github.com/xwiki-labs/cryptpad.git
+      dest: /home/pacs/{{pac}}/users/{{user}}/cryptpad
+      version: "{{cryptpad_version}}"
+      #single_branch: yes
+    when: not workingtree.stat.exists
+
+  - name: install client
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    shell: |
+      source ~/.profile
+      npm install -g bower || exit -1
+      npm install install || exit -1
+      bower install || exit -1
+      touch "/home/pacs/{{pac}}/users/{{user}}/.ansible_cryptpad_installed"
+    args:
+      executable: /bin/bash
+      chdir: "/home/pacs/{{pac}}/users/{{user}}/cryptpad"
+      creates: "/home/pacs/{{pac}}/users/{{user}}/.ansible_cryptpad_installed"
+
+  ##################################
+  ## configuration
+  ##################################
+
+  - name: upload configuration file
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/cryptpad/config.js" src="templates/config.js"
+
+  #################################
+  ## install data directory
+  #################################
+  - name: Check for HDD storage
+    stat:
+      path: /home/storage/{{pac}}/users/{{user}}
+    register: hdd_storage
+
+  - name: create data directory on storage
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "{{item}}"
+      state: directory
+      mode: 0744
+    when: hdd_storage.stat.exists
+    loop:
+      - "/home/storage/{{pac}}/users/{{user}}/data"
+      - "/home/storage/{{pac}}/users/{{user}}/data/blob"
+      - "/home/storage/{{pac}}/users/{{user}}/data/block"
+
+  - name: create symbolic link for data to storage
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      src: "/home/storage/{{pac}}/users/{{user}}/data"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/data"
+      state: link
+    when: hdd_storage.stat.exists
+
+  - name: create data directory on ssd
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "{{item}}"
+      state: directory
+      mode: 0744
+    when: not hdd_storage.stat.exists
+    loop:
+      - "/home/pacs/{{pac}}/users/{{user}}/data"
+      - "/home/pacs/{{pac}}/users/{{user}}/data/blob"
+      - "/home/pacs/{{pac}}/users/{{user}}/data/block"
+
+  ########################
+  ## setup the apache site
+  ########################
+
+  - name: create directory subs/api
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/subs/api"
+      state: directory
+
+  - name: create directory subs-ssl/api
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/subs-ssl/api"
+      state: directory
+
+  - name: upload domain htaccess file
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/.htaccess" src="templates/domain_htaccess"
+
+  - name: upload htdocs-ssl htaccess file
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/htdocs-ssl/.htaccess" src="templates/htaccess"
+
+  - name: upload http api htaccess file
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/subs/api/.htaccess" src="templates/http_api_htaccess"
+
+  - name: upload https api htaccess file
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/{{domain}}/subs-ssl/api/.htaccess" src="templates/https_api_htaccess"
+
+  - name: create symbolic link for data blob on ssd
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      src: "/home/pacs/{{pac}}/users/{{user}}/data/blob"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/blob"
+      state: link
+      when: not hdd_storage.stat.exists
+
+  - name: create symbolic link for data block on ssd
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      src: "/home/pacs/{{pac}}/users/{{user}}/data/block"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/block"
+      state: link
+      when: not hdd_storage.stat.exists
+
+  - name: create symbolic link for data blob on hdd
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      src: "/home/storage/{{pac}}/users/{{user}}/data/blob"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/blob"
+      state: link
+      when: hdd_storage.stat.exists
+
+  - name: create symbolic link for data block on hdd
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      src: "/home/storage/{{pac}}/users/{{user}}/data/block"
+      dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/block"
+      state: link
+      when: hdd_storage.stat.exists
+
+  ####################################
+  ## install cron jobs
+  ####################################
+  - name: start monit as cronjob
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    cron:
+      name: "start monit at reboot"
+      special_time: reboot
+      job: rm -f $HOME/var/run/* && /usr/bin/monit -c "$HOME/.monitrc"
+
+  ##############################################
+  ## start services via monit
+  ##############################################
+  - name: start monit
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    shell: |
+      /usr/bin/monit -c ".monitrc"
+    args:
+      executable: /bin/bash
+      chdir: "/home/pacs/{{pac}}/users/{{user}}/"
+      creates: "/home/pacs/{{pac}}/users/{{user}}/var/run/monit.id"
+

@@ -1,0 +1,8 @@
+DirectoryIndex disabled
+RewriteEngine On
+RewriteBase /
+RewriteCond %{HTTP:UPGRADE} ^WebSocket$           [NC,OR]
+RewriteCond %{HTTP:CONNECTION} ^Upgrade$          [NC]
+RewriteRule .* ws://127.0.0.1:{{cryptpad_port}}%{REQUEST_URI}  [proxy]
+RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_FILENAME} !-f
+RewriteRule .* http://127.0.0.1:{{cryptpad_port}}%{REQUEST_URI} [proxy,last]

@@ -1,0 +1,47 @@
+---
+- name: download nvm installer
+  become: yes
+  become_user: "{{pac}}-{{user}}"
+  get_url:
+    url: https://raw.githubusercontent.com/creationix/nvm/v0.39.0/install.sh
+    dest: /home/pacs/{{pac}}/users/{{user}}/install-nvm.sh
+    mode: 0700
+- name: run nvm installer
+  become: yes
+  become_user: "{{pac}}-{{user}}"
+  shell: |
+      touch /home/pacs/{{pac}}/users/{{user}}/.profile
+      chmod a+x /home/pacs/{{pac}}/users/{{user}}/.profile
+      /home/pacs/{{pac}}/users/{{user}}/install-nvm.sh
+  args:
+      executable: /bin/bash
+      chdir: "/home/pacs/{{pac}}/users/{{user}}/"
+      creates: "/home/pacs/{{pac}}/users/{{user}}/.nvm"
+- name: remove nvm installer
+  become: yes
+  become_user: "{{pac}}-{{user}}"
+  file:
+    path: /home/pacs/{{pac}}/users/{{user}}/install-nvm.sh
+    state: absent
+- name: install node.js
+  become: yes
+  become_user: "{{pac}}-{{user}}"
+  shell: |
+      . ~/.profile
+      nvm install {{noderelease}}
+      nvm alias default {{noderelease}}
+  args:
+      executable: /bin/bash
+      chdir: "/home/pacs/{{pac}}/users/{{user}}/"
+      creates: "/home/pacs/{{pac}}/users/{{user}}/.nvm/versions/node/{{nodeversion}}/bin/node"
+- name: install yarn
+  become: yes
+  become_user: "{{pac}}-{{user}}"
+  shell: |
+      . ~/.profile
+      npm install -g yarn
+  args:
+      executable: /bin/bash
+      chdir: "/home/pacs/{{pac}}/users/{{user}}/"
+      creates: "/home/pacs/{{pac}}/users/{{user}}/.nvm/versions/node/{{nodeversion}}/bin/TODO"
+  

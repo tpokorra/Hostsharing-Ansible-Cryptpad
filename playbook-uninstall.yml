@@ -1,0 +1,14 @@
+---
+- hosts: cryptpad
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+
+  #################################
+  ## remove the domain and the user
+  #################################
+  - name: drop domain
+    hsdomain.js: name="{{domain}}" owner="{{pac}}-{{user}}" exists="false"
+  - name: remove user
+    hsuser.js: name="{{pac}}-{{user}}" password="{{password}}" exists="false"
