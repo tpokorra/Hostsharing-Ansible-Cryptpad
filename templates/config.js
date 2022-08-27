@@ -5,11 +5,9 @@ module.exports = {
     httpAddress: '127.0.0.1',
     httpPort: {{cryptpad_port}},
     maxWorkers: 4,
-    /*
     adminKeys: [
-        "[admin@{{domain}}/xxxxxxxxxxxxxxxxxxxxxxxx=]",
+        "{{AdminKey}}",
     ],
-    */
     inactiveTime: 90, // days
     archiveRetentionTime: 15,
     accountRetentionTime: 365,

@@ -13,6 +13,12 @@
   #################################
   ## create directories
   #################################
+  - name: create directory bin
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    file:
+      path: "/home/pacs/{{pac}}/users/{{user}}/bin"
+      state: directory
   - name: create directory etc
     become: yes
     become_user: "{{pac}}-{{user}}"
@@ -203,6 +209,28 @@
       dest: "/home/pacs/{{pac}}/users/{{user}}/doms/{{domain}}/htdocs-ssl/block"
       state: link
     when: hdd_storage.stat.exists
+
+  ##################################
+  ## other software configuration
+  ##################################
+  - name: upload monit configuration
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/.monitrc" src="templates/monitrc" mode=0600 force=no
+
+  - name: upload start script
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/bin/start-cryptpad.sh" src="templates/start-cryptpad.sh" mode=0700
+  - name: upload stop script
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/bin/stop-cryptpad.sh" src="templates/stop-cryptpad.sh" mode=0700
+
+  - name: upload logrotate configuration
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    template: dest="/home/pacs/{{pac}}/users/{{user}}/.logrotate" src="templates/logrotate" mode=0600 force=no
 
   ####################################
   ## install cron jobs
