@@ -1,0 +1,23 @@
+cryptpad:
+  hosts:
+    {{pac}}-{{username}}:
+      ansible_ssh_host: {{pac}}.hostsharing.net
+      ansible_ssh_user: {{pac}}
+      pac: {{pac}}
+      domain: {{domain}}
+      user: {{username}}
+      password: {{password}}
+
+      cryptpad_port: {{port1}}
+      random_minute: {{RandomMinute}}
+
+      # see https://github.com/xwiki-labs/cryptpad/tags
+      cryptpad_version: "5.0.0"
+
+      # see https://nodejs.org/en/about/releases/
+      noderelease: 16
+      # see https://nodejs.org/download/release/latest-v16.x/
+      nodeversion: v16.17.0
+
+      SaasActivationPassword: {{SaasActivationPassword}}
+      SaasInstanceStatus: {{SaasInstanceStatus}}
