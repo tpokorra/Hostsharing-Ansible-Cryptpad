@@ -101,7 +101,7 @@
     file:
       path: "{{item}}"
       state: directory
-      mode: 0744
+      mode: 0777
     when: hdd_storage.stat.exists
     loop:
       - "/home/storage/{{pac}}/users/{{user}}/data"
@@ -123,7 +123,7 @@
     file:
       path: "{{item}}"
       state: directory
-      mode: 0744
+      mode: 0777
     when: not hdd_storage.stat.exists
     loop:
       - "/home/pacs/{{pac}}/users/{{user}}/data"
