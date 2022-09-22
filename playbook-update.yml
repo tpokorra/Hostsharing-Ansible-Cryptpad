@@ -1,0 +1,48 @@
+---
+- hosts: cryptpad
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+  - name: checkout package.json and package-lock.json
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    shell: |
+      git checkout package.json package-lock.json || exit -1
+    args:
+      executable: /bin/bash
+      chdir: "/home/pacs/{{pac}}/users/{{user}}/cryptpad"
+
+  - name: update the repo to new version
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    git:
+      repo: https://github.com/xwiki-labs/cryptpad.git
+      dest: /home/pacs/{{pac}}/users/{{user}}/cryptpad
+      version: "{{cryptpad_version}}"
+      # package.json and package-lock.json are modified
+      # force: true
+      #single_branch: yes
+
+  - name: update the other packages
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    shell: |
+      source ~/.profile
+      bower update || exit -1
+      npm update || exit -1
+      npm install || exit -1
+      npm run build || exit -1
+    args:
+      executable: /bin/bash
+      chdir: "/home/pacs/{{pac}}/users/{{user}}/cryptpad"
+
+  - name: restart the service
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    shell: |
+      ./stop-cryptpad.sh || exit -1
+      ./start-cryptpad.sh || exit -1
+    args:
+      executable: /bin/bash
+      chdir: "/home/pacs/{{pac}}/users/{{user}}/bin"
