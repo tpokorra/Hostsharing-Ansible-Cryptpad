@@ -15,7 +15,7 @@ cryptpad:
       random_minute: {{RandomMinute}}
 
       # see https://github.com/xwiki-labs/cryptpad/tags
-      cryptpad_version: "5.1.0"
+      cryptpad_version: "5.2.0"
 
       # see https://nodejs.org/en/about/releases/
       noderelease: 16
