@@ -14,7 +14,7 @@ cryptpad:
       cryptpad_port: 32003
 
       # see https://github.com/xwiki-labs/cryptpad/tags
-      cryptpad_version: "5.2.0"
+      cryptpad_version: "5.2.1"
 
       # see https://nodejs.org/en/about/releases/
       noderelease: 16
