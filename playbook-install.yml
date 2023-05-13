@@ -243,6 +243,15 @@
       special_time: reboot
       job: rm -f $HOME/var/run/* && /usr/bin/monit -c "$HOME/.monitrc"
 
+  - name: run logrotate once a day
+    become: yes
+    become_user: "{{pac}}-{{user}}"
+    cron:
+      name: "logrotate"
+      minute: "27"
+      hour: "1"
+      job: "/usr/sbin/logrotate -s $HOME/.logrotate.state $HOME/.logrotate"
+
   ##############################################
   ## start services via monit
   ##############################################
